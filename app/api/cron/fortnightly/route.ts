@@ -1,4 +1,5 @@
-import {NextRequest,NextResponse} from 'next/server';import {adminDb} from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminDb } from '@/lib/supabase-server';
 export const runtime='nodejs';
 export async function GET(req:NextRequest){
  const secret=process.env.CRON_SECRET;
