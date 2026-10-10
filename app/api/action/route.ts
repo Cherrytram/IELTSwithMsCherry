@@ -1,5 +1,6 @@
 import {NextRequest,NextResponse} from 'next/server';
-import {adminDb,serverDb,studentEmail} from '@/lib/supabase';
+import {adminDb,serverDb} from '@/lib/supabase-server';
+import {studentEmail} from '@/lib/supabase';
 import {coins,score,Question} from '@/lib/quiz';
 export const runtime='nodejs';
 const fail=(msg:string,status=400)=>NextResponse.json({error:msg},{status});
