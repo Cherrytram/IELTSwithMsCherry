@@ -1,5 +1,5 @@
 import {NextRequest,NextResponse} from 'next/server';
-import {adminDb,serverDb} from '@/lib/supabase';
+import {adminDb,serverDb} from '@/lib/supabase-server';
 export const runtime='nodejs';
 export const maxDuration=60;
 const error=(message:string,status=400)=>NextResponse.json({error:message},{status});
