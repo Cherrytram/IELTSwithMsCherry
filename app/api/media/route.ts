@@ -1,4 +1,5 @@
-import {NextRequest,NextResponse} from 'next/server';import {adminDb,serverDb} from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminDb, serverDb } from '@/lib/supabase-server';
 export async function GET(req:NextRequest){
  const {data:{user}}=await (await serverDb()).auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
  const path=req.nextUrl.searchParams.get('path')||'';const cls=path.split('/')[0];if(!/^[0-9a-f-]{36}$/i.test(cls)||path.includes('..'))return NextResponse.json({error:'Invalid path'},{status:400});
