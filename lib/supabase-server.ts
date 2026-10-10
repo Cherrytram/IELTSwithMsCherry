@@ -16,7 +16,7 @@ export async function serverDb() {
       getAll() {
         return jar.getAll();
       },
-      setAll(items) {
+setAll(items: { name: string; value: string; options?: Record<string, any> }[]) {
         try {
           items.forEach(({ name, value, options }) => {
             jar.set(name, value, options);
