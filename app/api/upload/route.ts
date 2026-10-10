@@ -1,4 +1,5 @@
-import {NextRequest,NextResponse} from 'next/server';import {adminDb,serverDb} from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminDb, serverDb } from '@/lib/supabase-server';
 export const runtime='nodejs';
 export async function POST(req:NextRequest){
  try{const auth=await serverDb();const {data:{user}}=await auth.auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
