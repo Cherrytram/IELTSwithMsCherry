@@ -83,8 +83,8 @@ export async function POST(req:NextRequest){
    if(!qs.length)throw new Error('Giáo viên chưa nhập câu hỏi');
    const answers=body.answers;if(!answers||typeof answers!=='object'||Array.isArray(answers))return fail('Đáp án không hợp lệ');
    const grading=score(qs,answers);const correct=grading.filter(g=>g.correct).length;
-   // An 80% mini-test pass threshold. Teacher may customize in a later version.
-   const miniPassed=stage==='mini'&&correct/qs.length>=.8;
+   // Completion-based progression: submission unlocks the next stage regardless of score.
+   const miniPassed=stage==='mini';
    const reward=stage==='exam'?coins(correct,qs.length):0;
    const {error:subError}=await db.from('submissions').insert({student_id:user.id,unit_id:unit.id,stage,answers,grading,correct,total:qs.length});if(subError)throw subError;
    let delta=0;
@@ -113,13 +113,13 @@ export async function POST(req:NextRequest){
   if(action==='save_work'){
    if(!student)return fail('Chỉ học sinh');await myEnrollment(str(body.classId));const skill=str(body.skill);if(!['writing','speaking'].includes(skill))return fail('Kỹ năng không hợp lệ');
    const mode=str(body.submissionMode,30);
-   if(!['teacher','ai'].includes(mode))return fail('Vui lòng chọn hình thức nộp bài');
+   if(mode!=='teacher')return fail('Writing và Speaking chỉ được nộp cho giáo viên chấm');
    const content=str(body.content,20000).trim(),audioPath=str(body.audioPath,400)||null;
    if(skill==='writing'&&!content)return fail('Hãy nhập bài Writing trước khi nộp');
    if(skill==='speaking'&&!audioPath)return fail('Hãy ghi âm Speaking trước khi nộp');
    if(audioPath){const {data:media}=await db.storage.from('ielts-media').list(audioPath.split('/').slice(0,-1).join('/'),{search:audioPath.split('/').at(-1)});if(!media?.some((f:any)=>f.name===audioPath.split('/').at(-1)))return fail('Không tìm thấy tệp ghi âm');}
-   const {data:saved,error}=await db.from('skill_work').insert({student_id:user.id,class_id:body.classId,skill,part:integer(body.part,1,skill==='writing'?2:3),content,audio_path:audioPath,submission_mode:mode,submission_status:mode==='teacher'?'submitted_to_teacher':'awaiting_ai'}).select('id').single();
-   if(error)throw error;return NextResponse.json({ok:true,workId:saved.id,submissionMode:mode,aiRequested:mode==='ai'});
+   const {data:saved,error}=await db.from('skill_work').insert({student_id:user.id,class_id:body.classId,skill,part:integer(body.part,1,skill==='writing'?2:3),content,audio_path:audioPath,submission_mode:mode,submission_status:'submitted_to_teacher'}).select('id').single();
+   if(error)throw error;return NextResponse.json({ok:true,workId:saved.id,submissionMode:mode,aiRequested:false});
   }
   return fail('Thao tác không hỗ trợ',404);
  }catch(e:any){console.error('API action failed',e);return fail(e?.message||'Đã xảy ra lỗi',400)}
